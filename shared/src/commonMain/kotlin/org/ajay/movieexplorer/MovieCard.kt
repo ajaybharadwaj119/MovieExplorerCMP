@@ -16,11 +16,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.ajay.movieexplorer.model.Movie
 
 @Composable
 fun MovieCard(
-    movieName: String,
-    rating: String
+    movie: Movie
 ) {
 
     Card(
@@ -43,14 +43,14 @@ fun MovieCard(
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = movieName,
+                text = movie.title,
                 style = MaterialTheme.typography.titleMedium
             )
 
             Spacer(modifier = Modifier.height(6.dp))
 
             Text(
-                text = "⭐ $rating",
+                text = "⭐ ${movie.rating}",
                 style = MaterialTheme.typography.bodyMedium
             )
 
@@ -59,9 +59,4 @@ fun MovieCard(
     }
 }
 
-@Composable
-@Preview
-fun Preview(){
-    MovieCard("ajay","1.2")
-}
 
