@@ -1,5 +1,4 @@
 package org.ajay.movieexplorer.model
-
 import kotlinx.serialization.Serializable
 
 @Serializable

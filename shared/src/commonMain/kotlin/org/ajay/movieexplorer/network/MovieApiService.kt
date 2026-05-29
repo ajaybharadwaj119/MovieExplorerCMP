@@ -6,8 +6,13 @@ import io.ktor.client.request.get
 
 class MovieApiService {
     suspend fun getShows(): List<ShowDto> {
-        return HttpClientFactory.client
+        println("API CALL STARTED")
+        val response = HttpClientFactory.client
             .get("https://api.tvmaze.com/shows")
-            .body()
+            .body<List<ShowDto>>()
+        println("API SUCCESS")
+        println("Total shows: ${response.size} \n $response")
+
+        return response
     }
 }
