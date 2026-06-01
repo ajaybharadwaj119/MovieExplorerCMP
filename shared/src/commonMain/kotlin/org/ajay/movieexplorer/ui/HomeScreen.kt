@@ -21,6 +21,7 @@ import org.ajay.movieexplorer.MovieCard
 import org.ajay.movieexplorer.model.Movie
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
+import kotlinx.coroutines.launch
 import org.ajay.movieexplorer.repository.MovieRepository
 
 @Composable
@@ -34,6 +35,10 @@ fun HomeScreen() {
         mutableStateOf(true)
     }
 
+    var errorMessage by remember {
+        mutableStateOf<String?>(null)
+    }
+
     var movieList by remember {
         mutableStateOf<List<Movie>>(emptyList())
     }
@@ -45,84 +50,122 @@ fun HomeScreen() {
     LaunchedEffect(Unit) {
         println("HomeScreen launched")
         isLoading = true
-        movieList = repository.getMovies()
-        isLoading = false
-        println("Movies loaded in UI")
-    }
+        errorMessage = null
 
-    if (isLoading) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator()
-        }
-    } else {
-
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-                .padding(16.dp)
-        ) {
-
-            item {
-                Text(
-                    text = "🎬 Movie Explorer",
-                    style = MaterialTheme.typography.headlineLarge
-                )
-            }
-
-            item {
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-
-            item {
-                Text(
-                    text = "Discover Popular Movies",
-                    style = MaterialTheme.typography.bodyLarge
-                )
-            }
-
-            item {
-                Spacer(modifier = Modifier.height(20.dp))
-            }
-
-            item {
-                OutlinedTextField(
-                    value = searchText,
-                    onValueChange = {
-                        searchText = it
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    label = {
-                        Text("Search Movies")
-                    },
-                    shape = RoundedCornerShape(16.dp)
-                )
-            }
-
-            item {
-                Spacer(modifier = Modifier.height(24.dp))
-            }
-
-            item {
-                Text(
-                    text = "Trending Movies",
-                    style = MaterialTheme.typography.titleLarge
-                )
-            }
-
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-
-            items(movieList) { movie ->
-
-                MovieCard(movie)
-
-                Spacer(modifier = Modifier.height(12.dp))
-            }
+        try {
+            movieList = repository.getMovies()
+            println("Movies loaded in UI")
+        } catch (e: Exception) {
+            println("API ERROR: ${e.message}")
+            errorMessage = e.message
+        } finally {
+            isLoading = false
         }
     }
+
+    when {
+
+        isLoading -> {
+
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+
+                CircularProgressIndicator()
+            }
+        }
+
+        errorMessage != null -> {
+
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+
+                Text(
+                    text = "Error: $errorMessage"
+                )
+            }
+        }
+
+        else -> {
+
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background)
+                    .padding(16.dp)
+            ) {
+
+                item {
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
+                item {
+                    Text(
+                        text = "🎬 Movie Explorer",
+                        style = MaterialTheme.typography.headlineLarge
+                    )
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
+                item {
+                    Text(
+                        text = "Discover Popular Movies",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(20.dp))
+                }
+
+                item {
+                    OutlinedTextField(
+                        value = searchText,
+                        onValueChange = {
+                            searchText = it
+                            if (searchText.isNotBlank()) {
+                                kotlinx.coroutines.MainScope().launch {
+                                    movieList = repository.searchMovies(searchText)
+                                }
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        label = {
+                            Text("Search Movies")
+                        },
+                        shape = RoundedCornerShape(16.dp)
+                    )
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
+
+                item {
+                    Text(
+                        text = "Trending Movies",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
+                items(movieList) { movie ->
+
+                    MovieCard(movie)
+
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+            }
+        }
+    }
+
 }

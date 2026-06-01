@@ -6,6 +6,8 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
 
+    alias(libs.plugins.sqldelight)
+
     kotlin("plugin.serialization") version "2.1.20"
 }
 
@@ -54,22 +56,31 @@ kotlin {
             implementation("io.ktor:ktor-client-content-negotiation:2.3.12")
             implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.12")
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+
+            implementation(libs.sqldelight.runtime)
+            implementation(libs.sqldelight.coroutines)
         }
 
         androidMain.dependencies {
             implementation(libs.compose.uiToolingPreview)
 
             implementation("io.ktor:ktor-client-okhttp:2.3.12")
+
+            implementation(libs.sqldelight.android.driver)
         }
 
         jvmMain.dependencies {
 
             implementation("io.ktor:ktor-client-java:2.3.12")
+
+            implementation(libs.sqldelight.jvm.driver)
         }
 
         iosMain.dependencies {
 
             implementation("io.ktor:ktor-client-darwin:2.3.12")
+
+            implementation(libs.sqldelight.native.driver)
         }
 
         commonTest.dependencies {
@@ -80,4 +91,12 @@ kotlin {
 
 dependencies {
     androidRuntimeClasspath(libs.compose.uiTooling)
+}
+
+sqldelight {
+    databases {
+        create("MovieDatabase") {
+            packageName.set("org.ajay.movieexplorer")
+        }
+    }
 }

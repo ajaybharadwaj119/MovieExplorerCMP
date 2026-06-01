@@ -1,0 +1,21 @@
+CREATE TABLE movie (
+    id INTEGER NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    imageUrl TEXT,
+    rating REAL
+);
+
+selectAllMovies:
+SELECT * FROM movie;
+
+insertMovie:
+INSERT OR REPLACE INTO movie(
+    id,
+    name,
+    imageUrl,
+    rating
+)
+VALUES (?, ?, ?, ?);
+
+deleteAllMovies:
+DELETE FROM movie;
